@@ -62,7 +62,7 @@ function connectionify<T>(
         )
       }
 
-      if (params.after) {
+      if (params.after != null) {
         const { pageNum, itemIndex } = cursor.decode(params.after)
 
         if (pageNum === NaN || itemIndex === NaN) {
@@ -80,7 +80,7 @@ function connectionify<T>(
         )
       }
 
-      if (params.before) {
+      if (params.before != null) {
         const { pageNum, itemIndex } = cursor.decode(params.before)
 
         if (pageNum === NaN || itemIndex === NaN) {
@@ -97,21 +97,18 @@ function connectionify<T>(
       )
     }
 
-    /**
-     * decode cursors and store it temporary
-     */
     let afterPageNum = 1
     let afterItemIndex = -1
 
     let beforePageNum = Infinity
     let beforeItemIndex = options.itemNumPerPage
 
-    if ('first' in params && params.after) {
+    if ('first' in params && params.after != null) {
       const { pageNum, itemIndex } = cursor.decode(params.after)
       afterPageNum = pageNum
       afterItemIndex = itemIndex
     }
-    if ('last' in params && params.before) {
+    if ('last' in params && params.before != null) {
       const { pageNum, itemIndex } = cursor.decode(params.before)
       beforePageNum = pageNum
       beforeItemIndex = itemIndex
@@ -142,21 +139,12 @@ function connectionify<T>(
         )
       }
     }
-    if ('last' in params) {
-      if (beforePageNum !== Infinity) {
-        for (let i = Math.ceil((5 - beforeItemIndex + 1 + params.last) / options.itemNumPerPage) - 1; i >= 0; i--) {
-          if (beforePageNum - i > 0) {
-            promises.push(
-              fetch({
-                pageNum: beforePageNum - i,
-              })
-            )
-          }
-        }
-        if (beforeItemIndex === options.itemNumPerPage - 1) {
+    if ('last' in params && beforePageNum !== Infinity) {
+      for (let i = Math.ceil((5 - beforeItemIndex + 1 + params.last) / options.itemNumPerPage) - 1; i >= 0; i--) {
+        if (beforePageNum - i > 0) {
           promises.push(
             fetch({
-              pageNum: beforePageNum + 1,
+              pageNum: beforePageNum - i,
             })
           )
         }
@@ -164,6 +152,7 @@ function connectionify<T>(
     }
 
     const responses = await Promise.all(promises)
+    const lastResponse = responses.length > 0 ? responses[responses.length - 1] : undefined
 
     for (let j = 0; j < responses.length; j++) {
       for (let k = 0; k < responses[j].items.length; k++) {
@@ -177,60 +166,70 @@ function connectionify<T>(
       }
     }
 
-    const _leftEdge = _edges[0] as _Edge<T> | undefined
-    const _leftEdgeCursor = _leftEdge && _leftEdge._cursor
     const _rightEdge = _edges.length > 0 ? _edges[_edges.length - 1] : undefined
     const _rightEdgeCursor = _rightEdge && _rightEdge._cursor
 
-    let edges: Array<Edge<T>> = _edges
-      .filter(({ _cursor }) => {
-        if ('first' in params) {
-          return afterPageNum === _cursor.pageNum ? afterItemIndex < _cursor.itemIndex : afterPageNum < _cursor.pageNum
-        }
-        if ('last' in params) {
-          return beforePageNum === _cursor.pageNum ? beforeItemIndex > _cursor.itemIndex : beforePageNum > _cursor.pageNum
-        }
-
-        return false
-      })
-      .map((_edge) => ({
-        node: _edge.node,
-        cursor: cursor.encode(_edge._cursor),
-      }))
-    
-    const lastResponse = responses.length > 0 ? responses[responses.length - 1] : undefined
+    let edges: Array<Edge<T>> = []
 
     if ('first' in params) {
-      if (edges.length > params.first) {
+      for (let i = 0; i < _edges.length; i++) {
+        const _edge = _edges[i]
+        const { _cursor } = _edge
+
+        if (afterPageNum === _cursor.pageNum ? afterItemIndex < _cursor.itemIndex : afterPageNum < _cursor.pageNum) {
+          edges = [...edges, {
+            node: _edge.node,
+            cursor: cursor.encode(_edge._cursor),
+          }]
+          if (edges.length >= params.first) {
+            break
+          }
+        }
+      }
+    }
+    if ('last' in params) {
+      for (let i = 0; i < _edges.length; i++) {
+        const _edge = _edges[_edges.length - 1 - i]
+        const { _cursor } = _edge
+
+        if (beforePageNum === _cursor.pageNum ? beforeItemIndex > _cursor.itemIndex : beforePageNum > _cursor.pageNum) {
+          edges = [{
+            node: _edge.node,
+            cursor: cursor.encode(_edge._cursor),
+          }, ...edges]
+          if (edges.length >= params.last) {
+            break
+          }
+        }
+      }
+    }
+
+    const firstEdge = edges[0] as Edge<T> | undefined
+    const lastEdge = edges.length > 0 ? edges[edges.length - 1] : undefined
+    const _firstEdgeCursor = firstEdge && cursor.decode(firstEdge.cursor)
+    const _lastEdgeCursor = lastEdge && cursor.decode(lastEdge.cursor)
+
+    if ('first' in params && _lastEdgeCursor) {
+      if (lastResponse?.pageInfo.nextPageNum != null) {
         pageInfo.hasNextPage = true
       }
-      if (edges.length === params.first && lastResponse?.pageInfo.nextPageNum !== null) {
+      if (_rightEdgeCursor?.pageNum !== _lastEdgeCursor.pageNum || _rightEdgeCursor?.itemIndex !== _lastEdgeCursor.itemIndex) {
         pageInfo.hasNextPage = true
       }
     }
-    if ('last' in params && edges.length > 0) {
-      const _lastEdgeCursor = cursor.decode(edges[edges.length - 1].cursor)
-
+    if ('last' in params && _lastEdgeCursor) {
+      if (lastResponse?.pageInfo.nextPageNum != null) {
+        pageInfo.hasNextPage = true
+      }
       if (_rightEdgeCursor?.pageNum !== _lastEdgeCursor.pageNum || _rightEdgeCursor?.itemIndex !== _lastEdgeCursor.itemIndex) {
         pageInfo.hasNextPage = true
       }
     }
 
-    edges = edges.filter((edge, edgeIndex) => {
-      if ('first' in params) {
-        return edgeIndex < params.first
+    if (_firstEdgeCursor) {
+      if (_firstEdgeCursor?.pageNum > 1 || _firstEdgeCursor?.itemIndex > 0) {
+        pageInfo.hasPreviousPage = true
       }
-      if ('last' in params) {
-        return (edges.length - 1 - edgeIndex) < params.last
-      }
-    })
-
-    const firstEdge = edges[0] as Edge<T> | undefined
-    const lastEdge = edges.length > 0 ? edges[edges.length - 1] : undefined
-    const _firstEdgeCursor = firstEdge && cursor.decode(firstEdge.cursor)
-
-    if (_firstEdgeCursor && (_firstEdgeCursor?.pageNum > 1 || _firstEdgeCursor?.itemIndex > 0)) {
-      pageInfo.hasPreviousPage = true
     }
 
     if (firstEdge) {
