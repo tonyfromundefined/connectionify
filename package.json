@@ -1,6 +1,6 @@
 {
   "name": "connectionify",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Convert page number based pagenation to cursor based connection",
   "keywords": [
     "connection",
@@ -13,7 +13,8 @@
   "license": "MIT",
   "author": "Tony <jeehyukwon@gmail.com>",
   "files": [
-    "/lib"
+    "/lib",
+    "README.md"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
