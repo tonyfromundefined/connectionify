@@ -2,11 +2,21 @@
   "name": "connectionify",
   "version": "1.0.0",
   "description": "Convert page number based pagenation to cursor based connection",
-  "main": "lib/index.js",
+  "keywords": [
+    "connection",
+    "cursor",
+    "graphql",
+    "pagination",
+    "relay"
+  ],
   "repository": "https://github.com/tonyfromundefined/connectionify",
-  "author": "Tony <jeehyukwon@gmail.com>",
   "license": "MIT",
-  "private": false,
+  "author": "Tony <jeehyukwon@gmail.com>",
+  "files": [
+    "/lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest"

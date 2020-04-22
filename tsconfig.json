@@ -5,6 +5,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "declaration": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -13,5 +14,11 @@
     "baseUrl": "./src",
     "outDir": "./lib"
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
 }
