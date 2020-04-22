@@ -1,6 +1,6 @@
 {
   "name": "connectionify",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Convert page number based pagenation to cursor based connection",
   "keywords": [
     "connection",
