@@ -109,13 +109,7 @@ function connectionify<T>(
       beforeItemIndex = itemIndex
     }
 
-    const _edges: Array<{
-      node: T
-      _cursor: {
-        pageNum: number
-        itemIndex: number
-      }
-    }> = []
+    const _edges: Array<_Edge<T>> = []
     const pageInfo: PageInfo = {
       hasNextPage: false,
       hasPreviousPage: false,
