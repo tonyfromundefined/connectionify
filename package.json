@@ -19,6 +19,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
+    "prettier": "prettier . --write",
     "test": "jest"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "@types/jest": "^25.2.1",
     "@types/js-base64": "^2.3.1",
     "jest": "^25.4.0",
+    "prettier": "^2.0.5",
     "ts-jest": "^25.4.0",
     "typescript": "^3.8.3"
   }

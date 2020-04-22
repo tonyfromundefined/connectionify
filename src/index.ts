@@ -6,13 +6,15 @@ interface OriginalPageInfo {
   prevPageNum: number | null
 }
 export interface OriginalReturn<T> {
-  items: T[],
+  items: T[]
   pageInfo: OriginalPageInfo
 }
 export interface OriginalParams {
   pageNum: number
 }
-export type OriginalFetchFunction<T> = (params: OriginalParams) => Promise<OriginalReturn<T>>
+export type OriginalFetchFunction<T> = (
+  params: OriginalParams
+) => Promise<OriginalReturn<T>>
 
 interface Edge<T> {
   cursor: string
@@ -35,31 +37,30 @@ export interface Connection<T> {
   edges: Array<Edge<T>>
   pageInfo: PageInfo
 }
-export type ConnectionifiedParams = {
-  first: number
-  after?: string | null
-} | {
-  last: number
-  before?: string | null
-}
-export type ConnectionifiedFetchFunction<T> = (params: ConnectionifiedParams) => Promise<Connection<T>>
+export type ConnectionifiedParams =
+  | {
+      first: number
+      after?: string | null
+    }
+  | {
+      last: number
+      before?: string | null
+    }
+export type ConnectionifiedFetchFunction<T> = (
+  params: ConnectionifiedParams
+) => Promise<Connection<T>>
 
 interface ConnectionifyOptions {
   itemNumPerPage: number
 }
 function connectionify<T>(
   fetch: OriginalFetchFunction<T>,
-  options: ConnectionifyOptions,
+  options: ConnectionifyOptions
 ): ConnectionifiedFetchFunction<T> {
   return async (params) => {
-    /**
-     * Type checks
-     */
     if ('first' in params) {
       if (params.first <= 0) {
-        throw new TypeError(
-          `the 'first' parameter should be larger than 0.`
-        )
+        throw new TypeError(`the 'first' parameter should be larger than 0.`)
       }
 
       if (params.after != null) {
@@ -67,17 +68,13 @@ function connectionify<T>(
 
         if (pageNum === NaN || itemIndex === NaN) {
           throw new TypeError(
-            'Invalid cursor type. ' +
-            `This cursor doesn't generated with given connectionify function.`
+            `Invalid cursor type. This cursor doesn't generated with given connectionify function.`
           )
         }
       }
-
     } else if ('last' in params) {
       if (params.last <= 0) {
-        throw new TypeError(
-          'the `last` parameter should be larger than 0'
-        )
+        throw new TypeError('the `last` parameter should be larger than 0')
       }
 
       if (params.before != null) {
@@ -85,12 +82,10 @@ function connectionify<T>(
 
         if (pageNum === NaN || itemIndex === NaN) {
           throw new TypeError(
-            'Invalid cursor type. ' +
-            `This cursor doesn't generated with given connectionify function.`
+            `Invalid cursor type. This cursor doesn't generated with given connectionify function.`
           )
         }
       }
-
     } else {
       throw new TypeError(
         `You should give 'first' or 'last' parameter in connectionified function`
@@ -115,10 +110,10 @@ function connectionify<T>(
     }
 
     const _edges: Array<{
-      node: T,
+      node: T
       _cursor: {
-        pageNum: number,
-        itemIndex: number,
+        pageNum: number
+        itemIndex: number
       }
     }> = []
     const pageInfo: PageInfo = {
@@ -131,7 +126,12 @@ function connectionify<T>(
     const promises: Array<ReturnType<OriginalFetchFunction<T>>> = []
 
     if ('first' in params) {
-      for (let i = 0; i < Math.ceil((afterItemIndex + 1 + params.first) / options.itemNumPerPage); i++) {
+      for (
+        let i = 0;
+        i <
+        Math.ceil((afterItemIndex + 1 + params.first) / options.itemNumPerPage);
+        i++
+      ) {
         promises.push(
           fetch({
             pageNum: afterPageNum + i,
@@ -140,7 +140,14 @@ function connectionify<T>(
       }
     }
     if ('last' in params && beforePageNum !== Infinity) {
-      for (let i = Math.ceil((5 - beforeItemIndex + 1 + params.last) / options.itemNumPerPage) - 1; i >= 0; i--) {
+      for (
+        let i =
+          Math.ceil(
+            (5 - beforeItemIndex + 1 + params.last) / options.itemNumPerPage
+          ) - 1;
+        i >= 0;
+        i--
+      ) {
         if (beforePageNum - i > 0) {
           promises.push(
             fetch({
@@ -152,7 +159,8 @@ function connectionify<T>(
     }
 
     const responses = await Promise.all(promises)
-    const lastResponse = responses.length > 0 ? responses[responses.length - 1] : undefined
+    const lastResponse =
+      responses.length > 0 ? responses[responses.length - 1] : undefined
 
     for (let j = 0; j < responses.length; j++) {
       for (let k = 0; k < responses[j].items.length; k++) {
@@ -176,11 +184,18 @@ function connectionify<T>(
         const _edge = _edges[i]
         const { _cursor } = _edge
 
-        if (afterPageNum === _cursor.pageNum ? afterItemIndex < _cursor.itemIndex : afterPageNum < _cursor.pageNum) {
-          edges = [...edges, {
-            node: _edge.node,
-            cursor: cursor.encode(_edge._cursor),
-          }]
+        if (
+          afterPageNum === _cursor.pageNum
+            ? afterItemIndex < _cursor.itemIndex
+            : afterPageNum < _cursor.pageNum
+        ) {
+          edges = [
+            ...edges,
+            {
+              node: _edge.node,
+              cursor: cursor.encode(_edge._cursor),
+            },
+          ]
           if (edges.length >= params.first) {
             break
           }
@@ -192,11 +207,18 @@ function connectionify<T>(
         const _edge = _edges[_edges.length - 1 - i]
         const { _cursor } = _edge
 
-        if (beforePageNum === _cursor.pageNum ? beforeItemIndex > _cursor.itemIndex : beforePageNum > _cursor.pageNum) {
-          edges = [{
-            node: _edge.node,
-            cursor: cursor.encode(_edge._cursor),
-          }, ...edges]
+        if (
+          beforePageNum === _cursor.pageNum
+            ? beforeItemIndex > _cursor.itemIndex
+            : beforePageNum > _cursor.pageNum
+        ) {
+          edges = [
+            {
+              node: _edge.node,
+              cursor: cursor.encode(_edge._cursor),
+            },
+            ...edges,
+          ]
           if (edges.length >= params.last) {
             break
           }
@@ -213,7 +235,10 @@ function connectionify<T>(
       if (lastResponse?.pageInfo.nextPageNum != null) {
         pageInfo.hasNextPage = true
       }
-      if (_rightEdgeCursor?.pageNum !== _lastEdgeCursor.pageNum || _rightEdgeCursor?.itemIndex !== _lastEdgeCursor.itemIndex) {
+      if (
+        _rightEdgeCursor?.pageNum !== _lastEdgeCursor.pageNum ||
+        _rightEdgeCursor?.itemIndex !== _lastEdgeCursor.itemIndex
+      ) {
         pageInfo.hasNextPage = true
       }
     }
@@ -221,7 +246,10 @@ function connectionify<T>(
       if (lastResponse?.pageInfo.nextPageNum != null) {
         pageInfo.hasNextPage = true
       }
-      if (_rightEdgeCursor?.pageNum !== _lastEdgeCursor.pageNum || _rightEdgeCursor?.itemIndex !== _lastEdgeCursor.itemIndex) {
+      if (
+        _rightEdgeCursor?.pageNum !== _lastEdgeCursor.pageNum ||
+        _rightEdgeCursor?.itemIndex !== _lastEdgeCursor.itemIndex
+      ) {
         pageInfo.hasNextPage = true
       }
     }
