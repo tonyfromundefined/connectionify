@@ -77,12 +77,24 @@ const connection = await getUsersConnection({
       "cursor": "MSM0",
       "node": { "id": "c8c39625-217d-5095-ac23-c64367c9303d" }
     },
+    {
+      "cursor": "MiMw",
+      "node": { "id": "b6949725-7349-5dbf-a078-d56b7445f07c" }
+    },
+    {
+      "cursor": "MiMx",
+      "node": { "id": "d37c5be5-44fd-5410-8b0a-91282f4a5bc5" }
+    },
+    {
+      "cursor": "MiMy",
+      "node": { "id": "aae1f1db-ff6d-5b27-8759-faa05754aec3" }
+    },
   ],
   "pageInfo": {
     "hasNextPage": true,
     "hasPrevPage": false,
     "startCursor": "MSMw",
-    "endCursor" "MSM0"
+    "endCursor" "MiMy"
   }
 }
 ```
