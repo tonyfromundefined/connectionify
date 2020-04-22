@@ -1,4 +1,4 @@
-import connectionify, { OriginalFetchFunction, Connection } from './'
+import connectionify, { Connection, OriginalFetchFunction } from './'
 
 const ITEMS = [
   { id: 'cd69734c-a75a-5128-8df8-068fb1037917' },
