@@ -87,7 +87,6 @@ test('connectionify is working properly', async () => {
     after: connection.pageInfo.endCursor,
   })
 
-
   expect(connection.edges[0].node.id).toBe('07c10287-0ecf-5667-a5d4-42086d8b9720')
   expect(connection.pageInfo.hasPreviousPage).toBe(true)
   expect(connection.pageInfo.hasNextPage).toBe(false)
