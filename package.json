@@ -1,0 +1,26 @@
+{
+  "name": "connectionify",
+  "version": "1.0.0",
+  "description": "Convert page number based pagenation to cursor based connection",
+  "main": "lib/index.js",
+  "repository": "https://github.com/tonyfromundefined/connectionify",
+  "author": "Tony <jeehyukwon@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "js-base64": "^2.5.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/jest": "^25.2.1",
+    "@types/js-base64": "^2.3.1",
+    "jest": "^25.4.0",
+    "ts-jest": "^25.4.0",
+    "typescript": "^3.8.3"
+  }
+}
