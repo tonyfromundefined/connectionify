@@ -2,6 +2,9 @@
 
 Change page number based pagination to cursor based connection conforming to [Relay Server Specification](https://relay.dev/docs/en/graphql-server-specification#connections).
 
+## What is the `Connection`?
+- [GraphQL Cursor Connection Specification](https://relay.dev/graphql/connections.htm)
+
 ## Install
 
 ```bash
@@ -10,11 +13,12 @@ $ yarn add connectionify
 
 ## If your API...
 
-Assume that your API using pagination based on page number, and 1 page has 5 items.
+Assume that your API
 
-```
-/users.json?&pageNum=1
-```
+- using pagination based on page number.
+- 1 page has 5 items.
+
+### `/users.json?&pageNum=1`
 
 ```json
 {
@@ -101,3 +105,10 @@ const connection = await getUsersConnection({
 
 ## See also
 - [Relay Server Specification](https://relay.dev/docs/en/graphql-server-specification#connections)
+
+## Todo
+- [ ] support 'last' argument without 'before' argument
+- [ ] offset based pagination support
+- [ ] connectionify as a nexus.js plugin
+
+> If you have a feature request or a bug, please create a new issue. And also, pull requests are always welcome🙏
