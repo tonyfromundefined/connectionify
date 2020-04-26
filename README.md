@@ -1,6 +1,6 @@
 # Connectionify
 
-Change page number based pagination to cursor based connection conforming to [Relay Server Specification](https://relay.dev/docs/en/graphql-server-specification#connections).
+Change page-number-based pagination to cursor-based connection conforming to [Relay Server Specification](https://relay.dev/docs/en/graphql-server-specification#connections).
 
 ## What is the `Connection`?
 - [GraphQL Cursor Connection Specification](https://relay.dev/graphql/connections.htm)
@@ -15,7 +15,7 @@ $ yarn add connectionify
 
 Assume that your API
 
-- using pagination based on page number.
+- using pagination based on page-number.
 - 1 page has 5 items.
 
 ### `/users.json?&pageNum=1`
@@ -108,7 +108,7 @@ const connection = await getUsersConnection({
 
 ## Todo
 - [ ] support 'last' argument without 'before' argument
-- [ ] offset based pagination support
+- [ ] offset-based pagination support
 - [ ] connectionify as a nexus.js plugin
 
 > If you have a feature request or a bug, please create a new issue. And also, pull requests are always welcome🙏
